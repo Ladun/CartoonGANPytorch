@@ -1,0 +1,7 @@
+{
+    "feature_network" : "resnet-101",
+    "disc_n_filters" : 32,
+    "disc_leakyrelu_negative_slope" : 0.2,
+    "gen_n_filters" : 64,
+    "leakyrelu_negative_slope": 0.2
+}
