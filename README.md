@@ -19,8 +19,8 @@ Alternatively you can build your own dataset by setting up the following directo
     |   |   |   ├── A              # Contains domain real world images
 
 # Train
-python train.py
+    python train.py
 
 
 # Test
-python infer.py --image=path/to/image or path/to/image_dir --output=path/to/save
+    python infer.py --image=path/to/image or path/to/image_dir --output=path/to/save
