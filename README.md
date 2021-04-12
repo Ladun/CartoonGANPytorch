@@ -23,4 +23,16 @@ Alternatively you can build your own dataset by setting up the following directo
 
 
 # Test
-    python infer.py --image=path/to/image or path/to/image_dir --output=path/to/save
+
+
+following directory structure:  
+
+    .
+    ├── input_dir                   
+    |   ├── image              # Training
+    |   |   ├── A              # Contains domain edge smoothed images
+    |   |   ├── ...            # Contains domain edge smoothed images
+
+## Testing code
+
+    python infer.py --weights=path/to/generator.pt --model_config=path/to/model_config --input=path/to/input --output_dir=path/to/output_dir
