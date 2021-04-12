@@ -10,15 +10,8 @@ from torch.utils.data import DataLoader
 from model.model import Generator, Discriminator
 
 
-transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(256),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
 
-])
-
-def load_image_dataloader(root_dir, batch_size, num_workers, shuffle=True):
+def load_image_dataloader(root_dir, transform, batch_size=1, num_workers=0, shuffle=True):
     """
     :param root_dir: directory that contains another directory of images. All images should be under root_dir/<some_dir>/
     :param batch_size: batch size

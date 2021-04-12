@@ -96,17 +96,17 @@ class Discriminator(nn.Module):
 
             nn.Conv2d(self.config.disc_n_filters, self.config.disc_n_filters * 2, kernel_size=3, stride=2, padding=1),
             nn.LeakyReLU(self.config.leakyrelu_negative_slope, inplace=True),
-            nn.Conv2d(self.config.disc_n_filters * 2, self.config.disc_n_filters * 4, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(self.config.disc_n_filters * 2, self.config.disc_n_filters * 2, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(self.config.disc_n_filters * 2),
+            nn.LeakyReLU(self.config.leakyrelu_negative_slope, inplace=True),
+            
+            nn.Conv2d(self.config.disc_n_filters * 2, self.config.disc_n_filters * 4, kernel_size=3, stride=2, padding=1),
+            nn.LeakyReLU(self.config.leakyrelu_negative_slope, inplace=True),
+            nn.Conv2d(self.config.disc_n_filters * 4, self.config.disc_n_filters * 4, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(self.config.disc_n_filters * 4),
             nn.LeakyReLU(self.config.leakyrelu_negative_slope, inplace=True),
             
-            nn.Conv2d(self.config.disc_n_filters * 4, self.config.disc_n_filters * 4, kernel_size=3, stride=2, padding=1),
-            nn.LeakyReLU(self.config.leakyrelu_negative_slope, inplace=True),
             nn.Conv2d(self.config.disc_n_filters * 4, self.config.disc_n_filters * 8, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(self.config.disc_n_filters * 8),
-            nn.LeakyReLU(self.config.leakyrelu_negative_slope, inplace=True),
-            
-            nn.Conv2d(self.config.disc_n_filters * 8, self.config.disc_n_filters * 8, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(self.config.disc_n_filters * 8),
             nn.LeakyReLU(self.config.leakyrelu_negative_slope, inplace=True),
 

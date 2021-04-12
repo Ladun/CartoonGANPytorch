@@ -8,6 +8,7 @@ from tensorboardX import SummaryWriter
 
 import torch.nn as nn
 import torch.optim
+from torchvision import transforms
 
 from config import Config
 from model.model import Generator, Discriminator, FeatureExtractor
@@ -46,6 +47,8 @@ def train(args,
 
     cur_epoch = 0
     cur_init_epoch = 0
+
+    data_len = min(len(photo_dataloader), len(edge_smooth_dataloader), len(animation_dataloader))
     
     if checkpoint_dir:
         try:
@@ -57,10 +60,10 @@ def train(args,
             global_step = checkpoint_dict['global_step']
             global_init_step = checkpoint_dict['global_init_step']
 
-            cur_epoch = global_step // len(photo_dataloader)
+            cur_epoch = global_step // data_len
             cur_init_epoch = global_init_step // len(photo_dataloader)
 
-            skipped_step = global_step % len(photo_dataloader)
+            skipped_step = global_step % data_len
             skipped_init_step = global_init_step % len(photo_dataloader)
 
             logger.info("Start training with,")
@@ -69,7 +72,7 @@ def train(args,
         except:
             logger.info("Wrong checkpoint path")
 
-    t_total = len(photo_dataloader) * args.n_epochs
+    t_total =  data_len * args.n_epochs
     t_init_total = len(photo_dataloader) * args.n_init_epoch
 
     # Train!
@@ -127,10 +130,12 @@ def train(args,
                     tb_writter.add_scalar('Initialization Phase/Content Loss', content_loss.item(), global_init_step)   
                     tb_writter.add_scalar('Initialization Phase/Global Generator Loss', gloabl_init_loss / global_init_step, global_init_step)   
                     
-                    logger.info("Initialization Phase, Epoch: %d, Global Step: %d, Content Loss: %.4f", init_epoch, global_init_step, gloabl_init_loss / (global_init_step))
-        
+                    logger.info("Initialization Phase, Epoch: %d, Global Step: %d, Content Loss: %.4f", init_epoch, global_init_step, gloabl_init_loss / (global_init_step))        
 
         # -----------------------------------------------------
+        logger.info("Finish Initialization Phase, save model...")
+        save(checkpoint_dir, global_step, global_init_step, generator, discriminator, gen_optimizer, disc_optimizer)
+
         init_phase = False
         global_loss_D = 0
         global_loss_G = 0
@@ -138,7 +143,7 @@ def train(args,
 
         mb = master_bar(range(cur_epoch, args.n_epochs))
         for epoch in mb:
-            epoch_iter = progress_bar(zip(animation_dataloader, edge_smooth_dataloader, photo_dataloader), parent=mb)
+            epoch_iter = progress_bar(list(zip(animation_dataloader, edge_smooth_dataloader, photo_dataloader)), parent=mb)
             for step, ((animation, _), (edge_smoothed, _), (photo, _))  in enumerate(epoch_iter):
                 if skipped_step > 0:
                     skipped_step =- 1
@@ -161,7 +166,7 @@ def train(args,
                 loss_edge_disc = disc_criterion(edge_smoothed_disc, edge_smoothed_target)
 
                 # ------ Train Discriminator with generated image
-                generated_image = discriminator(photo).detach()
+                generated_image = generator(photo).detach()
                 
                 generated_image_disc = discriminator(generated_image)
                 generated_image_target = torch.zeros_like(generated_image_disc)
@@ -285,10 +290,17 @@ def main():
     generator = Generator(model_config).to(args.device)
     discriminator = Discriminator(model_config).to(args.device)
     feature_extractor = FeatureExtractor(model_config).to(args.device)
+    
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(256),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+    ])
 
-    photo_dataloader, _ = load_image_dataloader(args.photo_dir, args.batch_size, args.n_cpu)
-    edge_smooth_dataloader, _ = load_image_dataloader(args.edge_smooth_dir, args.batch_size, args.n_cpu)
-    animation_dataloader, _ = load_image_dataloader(args.target_dir, args.batch_size, args.n_cpu)
+    photo_dataloader, _ = load_image_dataloader(args.photo_dir, transform, args.batch_size, args.n_cpu)
+    edge_smooth_dataloader, _ = load_image_dataloader(args.edge_smooth_dir, transform, args.batch_size, args.n_cpu)
+    animation_dataloader, _ = load_image_dataloader(args.target_dir, transform, args.batch_size, args.n_cpu)
 
     train(args, 
           generator, discriminator, feature_extractor, 

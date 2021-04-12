@@ -19,7 +19,7 @@ Alternatively you can build your own dataset by setting up the following directo
     |   |   |   ├── A              # Contains domain real world images
 
 # Train
-    python train.py
+    python train.py --checkpoint_dir=path/to/ckpt --model_config=path/to/model_config
 
 
 # Test
