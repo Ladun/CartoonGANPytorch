@@ -30,8 +30,7 @@ following directory structure:
     .
     ├── input_dir                   
     |   ├── image              # Training
-    |   |   ├── A              # Contains domain edge smoothed images
-    |   |   ├── ...            # Contains domain edge smoothed images
+    |   |   ├── A              # Contains input images
 
 ## Testing code
 
